@@ -9,6 +9,7 @@ export default class Model {
           title: 'Learn JS',
           description: 'Watch JS Tutorials',
           completed: false,
+          deadline: ''  // Agregamos el campo deadline por defecto
         }
       ]
       this.currentId = 1;
@@ -26,7 +27,7 @@ export default class Model {
   }
 
   getTodos() {
-    return this.todos.map((todo) => ({...todo}));
+    return this.todos.map((todo) => ({ ...todo }));
   }
 
   findTodo(id) {
@@ -46,24 +47,26 @@ export default class Model {
     this.save();
   }
 
-  addTodo(title, description) {
+  // Actualizamos addTodo para que acepte el parámetro deadline
+  addTodo(title, description, deadline) {
     const todo = {
       id: this.currentId++,
       title,
       description,
       completed: false,
+      deadline,  // Agregamos la fecha de deadline al nuevo todo
     }
 
     this.todos.push(todo);
     console.log(this.todos);
     this.save();
 
-    return {...todo};
+    return { ...todo };
   }
 
   removeTodo(id) {
     const index = this.findTodo(id);
-    this.todos.splice(index, 1);  
+    this.todos.splice(index, 1);
     this.save();
   }
 }

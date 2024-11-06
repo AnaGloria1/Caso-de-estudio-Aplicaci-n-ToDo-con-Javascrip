@@ -1,4 +1,4 @@
-import AddTodo from './components/add-todo.js';
+import AddTodo from './components/add-todo.js'; 
 import Modal from './components/modal.js';
 import Filters from './components/filters.js';
 
@@ -10,8 +10,7 @@ export default class View {
     this.modal = new Modal();
     this.filters = new Filters();
     
-
-    this.addTodoForm.onClick((title, description) => this.addTodo(title, description));
+    this.addTodoForm.onClick((title, description, deadline) => this.addTodo(title, description, deadline));
     this.modal.onClick((id, values) => this.editTodo(id, values));
     this.filters.onClick((filters) => this.filter(filters));
   }
@@ -29,7 +28,7 @@ export default class View {
     const { type, words } = filters;
     const [, ...rows] = this.table.getElementsByTagName('tr');
     for (const row of rows) {
-      const [title, description, completed] = row.children;
+      const [title, description, , completed] = row.children;
       let shouldHide = false;
 
       if (words) {
@@ -51,8 +50,8 @@ export default class View {
     }
   }
 
-  addTodo(title, description) {
-    const todo = this.model.addTodo(title, description);
+  addTodo(title, description, deadline) {
+    const todo = this.model.addTodo(title, description, deadline);
     this.createRow(todo);
   }
 
@@ -65,7 +64,8 @@ export default class View {
     const row = document.getElementById(id);
     row.children[0].innerText = values.title;
     row.children[1].innerText = values.description;
-    row.children[2].children[0].checked = values.completed;
+    row.children[2].innerText = values.deadline; // Ensure deadline is updated
+    row.children[3].children[0].checked = values.completed;
   }
 
   removeTodo(id) {
@@ -74,25 +74,26 @@ export default class View {
   }
 
   createRow(todo) {
-    const row = table.insertRow();
+    const row = this.table.insertRow();
     row.setAttribute('id', todo.id);
     row.innerHTML = `
       <td>${todo.title}</td>
       <td>${todo.description}</td>
+      <td>${todo.deadline ? todo.deadline : ''}</td> <!-- Display the deadline value -->
       <td class="text-center">
-
       </td>
       <td class="text-right">
-
       </td>
     `;
 
+    // Checkbox for completed status
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.checked = todo.completed;
     checkbox.onclick = () => this.toggleCompleted(todo.id);
-    row.children[2].appendChild(checkbox);
+    row.children[3].appendChild(checkbox);
 
+    // Edit button
     const editBtn = document.createElement('button');
     editBtn.classList.add('btn', 'btn-primary', 'mb-1');
     editBtn.innerHTML = '<i class="fa fa-pencil"></i>';
@@ -102,14 +103,16 @@ export default class View {
       id: todo.id,
       title: row.children[0].innerText,
       description: row.children[1].innerText,
-      completed: row.children[2].children[0].checked,
+      deadline: row.children[2].innerText, // Pass the deadline value to the modal
+      completed: row.children[3].children[0].checked,
     });
-    row.children[3].appendChild(editBtn);
+    row.children[4].appendChild(editBtn);
 
+    // Remove button
     const removeBtn = document.createElement('button');
     removeBtn.classList.add('btn', 'btn-danger', 'mb-1', 'ml-1');
     removeBtn.innerHTML = '<i class="fa fa-trash"></i>';
     removeBtn.onclick = () => this.removeTodo(todo.id);
-    row.children[3].appendChild(removeBtn);
+    row.children[4].appendChild(removeBtn);
   }
 }
